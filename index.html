@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Number - 전략 게임</title>
+<style>
+:root{--bg:#101827;--panel:#182438;--line:#33445f;--text:#edf4ff;--muted:#a8b7ce;--blue:#62a8ff;--red:#ff7777;--gold:#ffd166}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#1d3150,#0c1320 65%);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);min-height:100vh;padding:20px}
+main{max-width:1100px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+h1{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:.08em;margin:0}.subtitle{color:var(--muted);margin-top:3px}
+.pill{border:1px solid var(--line);border-radius:999px;padding:9px 14px;background:#17243a;color:var(--gold);font-weight:700}
+.layout{display:grid;grid-template-columns:minmax(280px,1fr) 300px;gap:18px;align-items:start}
+.board-wrap,.side section{background:rgba(24,36,56,.94);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 18px 45px #0003}
+.board{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;aspect-ratio:1}
+.cell{min-width:0;aspect-ratio:1;border:1px solid #354762;border-radius:7px;background:#111c2d;color:var(--text);font-size:clamp(12px,2.1vw,22px);font-weight:800;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;transition:.12s;padding:0}
+.cell:hover{border-color:#9ecaff;transform:translateY(-1px)}.cell.me{background:linear-gradient(145deg,#244f83,#173354);border-color:#5aa7ff;color:#fff}.cell.ai{background:linear-gradient(145deg,#793d49,#492631);border-color:#e87885;color:#fff}
+.cell.selected{outline:3px solid var(--gold);outline-offset:1px;z-index:2}.cell.target{box-shadow:inset 0 0 0 3px #ffd166;background:#52451f}.owner{position:absolute;bottom:2px;right:4px;font-size:8px;opacity:.75;font-weight:600}
+.side{display:grid;gap:14px}.side h2{font-size:1.05rem;margin:0 0 10px}.turn{font-size:1.15rem;font-weight:800;margin-bottom:7px}.status{color:var(--muted);line-height:1.5;font-size:.92rem;min-height:44px}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#101b2c;border:1px solid var(--line);border-radius:12px;padding:10px}.stat span{display:block;color:var(--muted);font-size:.8rem}.stat strong{font-size:1.5rem}
+button.action{width:100%;padding:11px;border-radius:10px;border:1px solid #4d6687;background:#243954;color:white;font-weight:750;cursor:pointer;margin-top:8px}button.action:hover{filter:brightness(1.15)}button.primary{background:#2867a9;border-color:#5aa7ff}button:disabled{opacity:.4;cursor:not-allowed}
+.rules{font-size:.88rem;color:#d2deef;line-height:1.55;padding-left:18px;margin:0}.rules li{margin:5px 0}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.82rem;margin-top:12px}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
+.log{max-height:150px;overflow:auto;color:var(--muted);font-size:.82rem;line-height:1.5}.log div{padding:4px 0;border-bottom:1px solid #293951}
+@media(max-width:800px){body{padding:10px}.layout{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.side section:last-child{grid-column:1/-1}.board-wrap{padding:8px}.board{gap:3px}.cell{border-radius:4px}.owner{font-size:7px}}
+@media(max-width:480px){.side{grid-template-columns:1fr}.side section:last-child{grid-column:auto}.cell{font-size:clamp(10px,3.3vw,17px)}}
+</style>
+</head>
+<body>
+<main>
+  <header class="top"><div><h1>NUMBER</h1><div class="subtitle">숫자를 키우고, 같은 성질의 적을 공략하라.</div></div><div class="pill" id="turnPill">내 차례</div></header>
+  <div class="layout">
+    <section class="board-wrap">
+      <div class="board" id="board" aria-label="10 x 10 게임판"></div>
+      <div class="legend"><span><i class="dot" style="background:#62a8ff"></i>나</span><span><i class="dot" style="background:#ff7777"></i>AI</span><span>노란 테두리: 선택/공격 가능</span></div>
+    </section>
+    <aside class="side">
+      <section><h2>전황</h2><div class="turn" id="turnText">내 차례</div><div class="status" id="status">빈칸을 클릭해 숫자를 배치하세요.</div><div class="stats"><div class="stat"><span>내 숫자 합</span><strong id="mySum">0</strong></div><div class="stat"><span>AI 숫자 합</span><strong id="aiSum">0</strong></div><div class="stat"><span>내 말 수</span><strong id="myCount">0</strong></div><div class="stat"><span>전체 턴</span><strong id="turnCount">0</strong></div></div><button class="action primary" id="endAction">선택 취소</button><button class="action" id="restart">새 게임</button></section>
+      <section><h2>플레이 방법</h2><ol class="rules"><li>빈칸을 눌러 숫자 1 또는 2를 무작위로 배치합니다.</li><li>내 숫자를 누른 뒤 다시 누르면 숫자가 1 증가합니다. 숫자 키우기는 말마다 한 번만 가능합니다.</li><li>선택한 말의 상하좌우(＋자)에 있는 적을 공격할 수 있습니다.</li><li>공격은 홀수끼리 또는 짝수끼리만 가능합니다.</li><li>잡으면 공격 말이 적의 칸으로 이동하고, 홀수↔짝수로 바뀝니다.</li><li>50턴이 지난 뒤 내 숫자 합이 10 이하이면 패배합니다. 100턴에 도달하거나 판이 가득 차면 양쪽 숫자 합을 비교해 높은 쪽이 승리합니다.</li></ol></section>
+      <section><h2>전투 기록</h2><div class="log" id="log">게임을 시작했습니다.</div></section>
+    </aside>
+  </div>
+</main>
+<script>
+const boardEl=document.getElementById('board');
+let cells=[], turn='me', turns=0, selected=-1, gameOver=false, actionUsed=false, logItems=[];
+const dirs=[[-1,0],[1,0],[0,-1],[0,1]];
+function parity(n){return n%2===0?'even':'odd'}
+function neighbors(i){let r=Math.floor(i/10),c=i%10;return dirs.map(([dr,dc])=>[r+dr,c+dc]).filter(([rr,cc])=>rr>=0&&rr<10&&cc>=0&&cc<10).map(([rr,cc])=>rr*10+cc)}
+function addLog(s){logItems.unshift(s);logItems=logItems.slice(0,30);document.getElementById('log').innerHTML=logItems.map(x=>'<div>'+x+'</div>').join('')}
+function sums(owner){return cells.reduce((a,x)=>a+(x&&x.owner===owner?x.n:0),0)}
+function count(owner){return cells.filter(x=>x&&x.owner===owner).length}
+function setStatus(s){document.getElementById('status').textContent=s}
+function render(){
+ boardEl.innerHTML='';
+ const attackTargets=new Set();
+ if(selected>=0&&cells[selected]&&cells[selected].owner==='me'){
+   neighbors(selected).forEach(i=>{let x=cells[i];if(x&&x.owner==='ai'&&parity(x.n)===parity(cells[selected].n))attackTargets.add(i)})
+ }
+ cells.forEach((x,i)=>{
+   const b=document.createElement('button');b.className='cell'+(x?' '+x.owner:'')+(selected===i?' selected':'')+(attackTargets.has(i)?' target':'');
+   b.setAttribute('aria-label',x?(x.owner==='me'?'내 숫자':'AI 숫자')+' '+x.n:'빈칸');
+   b.innerHTML=x?x.n+'<span class="owner">'+(x.owner==='me'?'나':'AI')+'</span>':'';
+   b.addEventListener('click',()=>clickCell(i));boardEl.appendChild(b);
+ });
+ document.getElementById('mySum').textContent=sums('me');document.getElementById('aiSum').textContent=sums('ai');
+ document.getElementById('myCount').textContent=count('me');document.getElementById('turnCount').textContent=turns;
+ document.getElementById('turnText').textContent=gameOver?'게임 종료':turn==='me'?'내 차례':'AI 생각 중…';
+ document.getElementById('turnPill').textContent=gameOver?'게임 종료':turn==='me'?'내 차례':'AI 차례';
+ document.getElementById('endAction').textContent=selected>=0?'선택 취소':'내 숫자 선택';
+}
+function clickCell(i){
+ if(gameOver||turn!=='me')return;
+ const x=cells[i];
+ if(selected>=0&&selected!==i&&cells[selected]){
+   const attacker=cells[selected];
+   if(x&&x.owner==='ai'&&neighbors(selected).includes(i)&&parity(attacker.n)===parity(x.n)){
+     const old=x.n;cells[i]={owner:'me',n:attacker.n+1,boosted:attacker.boosted};
+     if(parity(cells[i].n)===parity(old))cells[i].n++;
+     cells[selected]=null;selected=i;addLog('내 '+attacker.n+'이(가) AI '+old+'을(를) 잡았다!');finishTurn();return;
+   }
+ }
+ if(!x){cells[i]={owner:'me',n:Math.random()<.5?1:2,boosted:false};selected=i;addLog('빈칸에 내 숫자 '+cells[i].n+' 배치');finishTurn();return}
+ if(x.owner==='me'){
+   if(selected===i){
+     if(!x.boosted){x.n++;x.boosted=true;addLog('내 숫자를 '+x.n+'로 올렸다.');selected=-1;finishTurn();return}
+     setStatus('이 숫자는 이미 이번 게임에서 증가시켰어요. 다른 말을 선택하세요.');return;
+   }
+   selected=i;setStatus('선택한 숫자를 다시 누르면 +1, 상하좌우의 같은 홀짝 적은 공격할 수 있어요.');render();return;
+ }
+ if(selected>=0){setStatus('공격하려면 상하좌우에 있는 같은 홀짝의 적 숫자를 누르세요.');return}
+ setStatus('내 숫자를 먼저 선택하세요.');render();
+}
+function finishTurn(){
+ selected=-1;turns++;checkEnd();
+ if(!gameOver){turn='ai';render();setTimeout(aiMove,450)}else render();
+}
+function checkEnd(){
+ if(turns>=50&&sums('me')<=10){gameOver=true;setStatus('패배! 50턴 이후 내 숫자 합이 10 이하입니다.');addLog('패배: 50턴 이후 내 숫자 합이 10 이하');return}
+ if(turns>=50&&sums('ai')<=10){gameOver=true;setStatus('승리! AI의 숫자 합이 10 이하입니다. (50턴 이후)');addLog('승리: AI 숫자 합이 10 이하');return}
+ const boardFull=cells.every(x=>x!==null);
+ if(turns>=100||boardFull){
+   const myTotal=sums('me'), aiTotal=sums('ai');
+   gameOver=true;
+   if(myTotal>aiTotal){setStatus('승리! 최종 숫자 합 '+myTotal+' 대 '+aiTotal+'로 이겼습니다.');addLog('게임 종료: 내 합 '+myTotal+', AI 합 '+aiTotal+' — 승리')}
+   else if(aiTotal>myTotal){setStatus('패배! 최종 숫자 합 '+myTotal+' 대 '+aiTotal+'입니다.');addLog('게임 종료: 내 합 '+myTotal+', AI 합 '+aiTotal+' — 패배')}
+   else{setStatus('무승부! 최종 숫자 합이 '+myTotal+'로 같습니다.');addLog('게임 종료: 양쪽 합 '+myTotal+' — 무승부')}
+   return;
+ }
+}
+function aiMove(){
+ if(gameOver)return;
+ let options=[];
+ for(let i=0;i<100;i++){let a=cells[i];if(!a||a.owner!=='ai')continue;for(const j of neighbors(i)){let t=cells[j];if(t&&t.owner==='me'&&parity(a.n)===parity(t.n))options.push({i,j})}}
+ if(options.length){
+   const o=options[Math.floor(Math.random()*options.length)],a=cells[o.i],t=cells[o.j],old=t.n;
+   let n=a.n+1;if(parity(n)===parity(old))n++;
+   cells[o.j]={owner:'ai',n,boosted:a.boosted};cells[o.i]=null;addLog('AI가 내 '+old+'을(를) 잡았다.')
+ }else{
+   const boostable=cells.map((x,i)=>x&&x.owner==='ai'&&!x.boosted?i:-1).filter(i=>i>=0);
+   const empty=cells.map((x,i)=>x===null?i:-1).filter(i=>i>=0);
+   if(boostable.length&&Math.random()<.35){let i=boostable[Math.floor(Math.random()*boostable.length)];cells[i].n++;cells[i].boosted=true;addLog('AI가 자기 숫자를 '+cells[i].n+'로 올렸다.')}
+   else if(empty.length){let i=empty[Math.floor(Math.random()*empty.length)];cells[i]={owner:'ai',n:Math.random()<.5?1:2,boosted:false};addLog('AI가 숫자 '+cells[i].n+' 배치')}
+   else if(boostable.length){let i=boostable[Math.floor(Math.random()*boostable.length)];cells[i].n++;cells[i].boosted=true;addLog('AI가 숫자를 올렸다.')}
+ }
+ turns++;checkEnd();turn='me';setStatus(gameOver?'게임이 끝났습니다.':'빈칸을 눌러 배치하거나 내 숫자를 선택하세요.');render();
+}
+function reset(){
+ cells=Array(100).fill(null);turn='me';turns=0;selected=-1;gameOver=false;logItems=[];setStatus('빈칸을 클릭해 숫자를 배치하세요.');addLog('새 게임을 시작했습니다.');render();
+}
+document.getElementById('endAction').addEventListener('click',()=>{selected=-1;setStatus('선택을 취소했습니다.');render()});
+document.getElementById('restart').addEventListener('click',reset);
+reset();
+</script>
+</body>
+</html>
