@@ -32,11 +32,13 @@ import { getDatabase, ref, set, get, onValue, runTransaction, remove, update } f
 
 /* Firebase Console에서 만든 웹 앱 설정을 아래에 붙여 넣으세요. */
 const firebaseConfig = {
-  apiKey: "PASTE_API_KEY",
-  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://PASTE_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "PASTE_PROJECT_ID",
-  appId: "PASTE_APP_ID"
+  apiKey: "AIzaSyCPExjyMj6C1hgW9FDQZnyqYRPRIXK9O7s",
+  authDomain: "number-online-game.firebaseapp.com",
+  projectId: "number-online-game",
+  storageBucket: "number-online-game.firebasestorage.app",
+  messagingSenderId: "560061304242",
+  appId: "1:560061304242:web:7ed05a32562d0e012da8ab",
+  measurementId: "G-QD2RZ6CBDN"
 };
 const onlineConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig.projectId !== "PASTE_PROJECT_ID";
 let auth=null,db=null,myUid=null,unsubscribeRoom=null,roomId=null,roomData=null,quickListener=null,mode="ai",nickname="",cells=[],turns=0,turn="me",selected=-1,gameOver=false,actionUsed=false,logs=[],busy=false;
