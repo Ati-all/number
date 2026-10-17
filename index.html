@@ -1,135 +1,127 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Number - 전략 게임</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Number - 숫자 전략 대전</title>
 <style>
-:root{--bg:#101827;--panel:#182438;--line:#33445f;--text:#edf4ff;--muted:#a8b7ce;--blue:#62a8ff;--red:#ff7777;--gold:#ffd166}
-*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at top,#1d3150,#0c1320 65%);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text);min-height:100vh;padding:20px}
-main{max-width:1100px;margin:auto}.top{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:16px}
-h1{font-size:clamp(2rem,5vw,3.4rem);letter-spacing:.08em;margin:0}.subtitle{color:var(--muted);margin-top:3px}
-.pill{border:1px solid var(--line);border-radius:999px;padding:9px 14px;background:#17243a;color:var(--gold);font-weight:700}
-.layout{display:grid;grid-template-columns:minmax(280px,1fr) 300px;gap:18px;align-items:start}
-.board-wrap,.side section{background:rgba(24,36,56,.94);border:1px solid var(--line);border-radius:18px;padding:14px;box-shadow:0 18px 45px #0003}
-.board{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;aspect-ratio:1}
-.cell{min-width:0;aspect-ratio:1;border:1px solid #354762;border-radius:7px;background:#111c2d;color:var(--text);font-size:clamp(12px,2.1vw,22px);font-weight:800;display:flex;align-items:center;justify-content:center;position:relative;cursor:pointer;transition:.12s;padding:0}
-.cell:hover{border-color:#9ecaff;transform:translateY(-1px)}.cell.me{background:linear-gradient(145deg,#244f83,#173354);border-color:#5aa7ff;color:#fff}.cell.ai{background:linear-gradient(145deg,#793d49,#492631);border-color:#e87885;color:#fff}
-.cell.selected{outline:3px solid var(--gold);outline-offset:1px;z-index:2}.cell.target{box-shadow:inset 0 0 0 3px #ffd166;background:#52451f}.owner{position:absolute;bottom:2px;right:4px;font-size:8px;opacity:.75;font-weight:600}
-.side{display:grid;gap:14px}.side h2{font-size:1.05rem;margin:0 0 10px}.turn{font-size:1.15rem;font-weight:800;margin-bottom:7px}.status{color:var(--muted);line-height:1.5;font-size:.92rem;min-height:44px}
-.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}.stat{background:#101b2c;border:1px solid var(--line);border-radius:12px;padding:10px}.stat span{display:block;color:var(--muted);font-size:.8rem}.stat strong{font-size:1.5rem}
-button.action{width:100%;padding:11px;border-radius:10px;border:1px solid #4d6687;background:#243954;color:white;font-weight:750;cursor:pointer;margin-top:8px}button.action:hover{filter:brightness(1.15)}button.primary{background:#2867a9;border-color:#5aa7ff}button:disabled{opacity:.4;cursor:not-allowed}
-.rules{font-size:.88rem;color:#d2deef;line-height:1.55;padding-left:18px;margin:0}.rules li{margin:5px 0}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.82rem;margin-top:12px}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}
-.log{max-height:150px;overflow:auto;color:var(--muted);font-size:.82rem;line-height:1.5}.log div{padding:4px 0;border-bottom:1px solid #293951}
-@media(max-width:800px){body{padding:10px}.layout{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.side section:last-child{grid-column:1/-1}.board-wrap{padding:8px}.board{gap:3px}.cell{border-radius:4px}.owner{font-size:7px}}
-@media(max-width:480px){.side{grid-template-columns:1fr}.side section:last-child{grid-column:auto}.cell{font-size:clamp(10px,3.3vw,17px)}}
+:root{color-scheme:dark;--bg:#0b1220;--panel:#172338;--line:#344763;--text:#edf4ff;--muted:#a7b8d0;--blue:#62a8ff;--red:#ff7777;--gold:#ffd166}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;padding:18px;background:radial-gradient(circle at top,#20385b,#0b1220 68%);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text)}button,input{font:inherit}button{cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}.wrap{max-width:1100px;margin:auto}.brand{text-align:center;margin:22px 0 28px}.brand h1{font-size:clamp(2.7rem,8vw,5rem);letter-spacing:.14em;margin:0;line-height:1.05}.brand p{color:var(--muted);margin:12px 0}.panel{background:rgba(23,35,56,.96);border:1px solid var(--line);border-radius:18px;padding:20px;box-shadow:0 18px 45px #0003}.home{max-width:560px;margin:auto}.label{display:block;font-weight:750;margin-bottom:8px}.field{width:100%;padding:13px 14px;border-radius:11px;border:1px solid #4a607e;background:#0c1728;color:white;outline:none}.field:focus{border-color:var(--blue);box-shadow:0 0 0 3px #62a8ff25}.modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px}.action{border:1px solid #4d6687;background:#243954;color:white;padding:13px 14px;border-radius:11px;font-weight:800;width:100%;transition:.15s}.action:hover{filter:brightness(1.15);transform:translateY(-1px)}.primary{background:#2867a9;border-color:#5aa7ff}.green{background:#1d604f;border-color:#43a88c}.roomtools{border-top:1px solid var(--line);margin-top:20px;padding-top:18px}.roomtools h2{font-size:1rem;margin:0 0 12px}.joinrow{display:flex;gap:8px}.joinrow .field{min-width:0}.hint,.status{color:var(--muted);font-size:.9rem;line-height:1.5}.hint{margin:14px 0 0}.hidden{display:none!important}.gamehead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:16px}.gamehead h1{margin:0;font-size:2rem;letter-spacing:.1em}.badge{border:1px solid var(--line);border-radius:999px;padding:8px 12px;color:var(--gold);font-weight:800}.layout{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:16px;align-items:start}.boardwrap,.side section{background:rgba(23,35,56,.96);border:1px solid var(--line);border-radius:16px;padding:12px}.board{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:4px;aspect-ratio:1}.cell{min-width:0;aspect-ratio:1;border:1px solid #354762;border-radius:6px;background:#101b2c;color:white;font-size:clamp(11px,2vw,22px);font-weight:850;display:flex;align-items:center;justify-content:center;position:relative;padding:0}.cell.me{background:linear-gradient(145deg,#244f83,#173354);border-color:#5aa7ff}.cell.enemy{background:linear-gradient(145deg,#793d49,#492631);border-color:#e87885}.cell.selected{outline:3px solid var(--gold);outline-offset:1px;z-index:2}.cell.target{box-shadow:inset 0 0 0 3px var(--gold)}.owner{position:absolute;bottom:1px;right:3px;font-size:7px;opacity:.85}.legend{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:.8rem;margin-top:10px}.dot{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px}.side{display:grid;gap:12px}.side h2{font-size:1rem;margin:0 0 10px}.turn{font-size:1.1rem;font-weight:850;margin-bottom:8px}.status{min-height:42px}.stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.stat{background:#101b2c;border:1px solid var(--line);border-radius:10px;padding:9px}.stat span{display:block;color:var(--muted);font-size:.78rem}.stat strong{font-size:1.35rem}.rules{font-size:.84rem;color:#d2deef;line-height:1.5;padding-left:18px;margin:0}.rules li{margin:5px 0}.log{max-height:145px;overflow:auto;color:var(--muted);font-size:.8rem;line-height:1.5}.log div{padding:4px 0;border-bottom:1px solid #293951}.gamebuttons{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.gamebuttons .action{padding:10px 8px}.roomcode{font-size:1.3rem;font-weight:900;letter-spacing:.15em;color:var(--gold);word-break:break-all}.notice{padding:11px;border:1px solid #725c2b;background:#3b311b;border-radius:10px;color:#ffe4a3;font-size:.86rem;margin-top:12px}
+@media(max-width:780px){body{padding:10px}.layout{grid-template-columns:1fr}.side{grid-template-columns:1fr 1fr}.side section:last-child{grid-column:1/-1}.boardwrap{padding:7px}.board{gap:3px}.cell{border-radius:4px}}@media(max-width:480px){.panel{padding:15px}.modes{grid-template-columns:1fr}.side{grid-template-columns:1fr}.side section:last-child{grid-column:auto}.cell{font-size:clamp(10px,3.1vw,16px)}.owner{font-size:6px}.brand{margin-top:12px}}
 </style>
 </head>
-<body>
-<main>
-  <header class="top"><div><h1>NUMBER</h1><div class="subtitle">숫자를 키우고, 같은 성질의 적을 공략하라.</div></div><div class="pill" id="turnPill">내 차례</div></header>
-  <div class="layout">
-    <section class="board-wrap">
-      <div class="board" id="board" aria-label="10 x 10 게임판"></div>
-      <div class="legend"><span><i class="dot" style="background:#62a8ff"></i>나</span><span><i class="dot" style="background:#ff7777"></i>AI</span><span>노란 테두리: 선택/공격 가능</span></div>
-    </section>
-    <aside class="side">
-      <section><h2>전황</h2><div class="turn" id="turnText">내 차례</div><div class="status" id="status">빈칸을 클릭해 숫자를 배치하세요.</div><div class="stats"><div class="stat"><span>내 숫자 합</span><strong id="mySum">0</strong></div><div class="stat"><span>AI 숫자 합</span><strong id="aiSum">0</strong></div><div class="stat"><span>내 말 수</span><strong id="myCount">0</strong></div><div class="stat"><span>전체 턴</span><strong id="turnCount">0</strong></div></div><button class="action primary" id="endAction">선택 취소</button><button class="action" id="restart">새 게임</button></section>
-      <section><h2>플레이 방법</h2><ol class="rules"><li>빈칸을 눌러 숫자 1 또는 2를 무작위로 배치합니다.</li><li>내 숫자를 누른 뒤 다시 누르면 숫자가 1 증가합니다. 숫자 키우기는 말마다 한 번만 가능합니다.</li><li>선택한 말의 상하좌우(＋자)에 있는 적을 공격할 수 있습니다.</li><li>공격은 홀수끼리 또는 짝수끼리만 가능합니다.</li><li>잡으면 공격 말이 적의 칸으로 이동하고, 홀수↔짝수로 바뀝니다.</li><li>50턴이 지난 뒤 내 숫자 합이 10 이하이면 패배합니다. 100턴에 도달하거나 판이 가득 차면 양쪽 숫자 합을 비교해 높은 쪽이 승리합니다.</li></ol></section>
-      <section><h2>전투 기록</h2><div class="log" id="log">게임을 시작했습니다.</div></section>
-    </aside>
-  </div>
-</main>
-<script>
-const boardEl=document.getElementById('board');
-let cells=[], turn='me', turns=0, selected=-1, gameOver=false, actionUsed=false, logItems=[];
-const dirs=[[-1,0],[1,0],[0,-1],[0,1]];
-function parity(n){return n%2===0?'even':'odd'}
-function neighbors(i){let r=Math.floor(i/10),c=i%10;return dirs.map(([dr,dc])=>[r+dr,c+dc]).filter(([rr,cc])=>rr>=0&&rr<10&&cc>=0&&cc<10).map(([rr,cc])=>rr*10+cc)}
-function addLog(s){logItems.unshift(s);logItems=logItems.slice(0,30);document.getElementById('log').innerHTML=logItems.map(x=>'<div>'+x+'</div>').join('')}
-function sums(owner){return cells.reduce((a,x)=>a+(x&&x.owner===owner?x.n:0),0)}
+<body><main class="wrap">
+<header class="brand"><h1>NUMBER</h1><p>숫자를 키우고, 같은 성질의 적을 공략하라.</p></header>
+<section id="home" class="panel home">
+<label class="label" for="nickname">닉네임</label><input id="nickname" class="field" maxlength="16" autocomplete="nickname" placeholder="게임에서 사용할 닉네임을 입력하세요">
+<div class="modes"><button class="action primary" id="aiStart">🤖 AI 대전</button><button class="action green" id="createRoom">🔐 방 코드 만들기</button></div>
+<div class="roomtools"><h2>친구와 방 코드 대전</h2><div class="joinrow"><input id="roomInput" class="field" maxlength="6" placeholder="방 코드 6자리" aria-label="방 코드"><button id="joinRoom" class="action" style="width:auto;white-space:nowrap">참가</button></div>
+<h2 style="margin-top:18px">빠른 대전</h2><button class="action" id="quickMatch">⚡ 상대 찾기</button><p class="hint">온라인 대전은 Firebase 연결 설정이 완료되어야 사용할 수 있어요. AI 대전은 바로 플레이할 수 있습니다.</p><div id="homeStatus" class="status" aria-live="polite"></div></div>
+<div id="setupNotice" class="notice hidden">온라인 기능 설정이 아직 완료되지 않았어요. 저장소의 README에 있는 Firebase 설정 안내를 따라 주세요.</div>
+</section>
+<section id="game" class="hidden">
+<div class="gamehead"><h1>NUMBER</h1><div class="badge" id="turnPill">내 차례</div></div>
+<div class="layout"><section class="boardwrap"><div class="board" id="board" aria-label="10 x 10 게임판"></div><div class="legend"><span><i class="dot" style="background:#62a8ff"></i>나</span><span><i class="dot" style="background:#ff7777"></i><span id="enemyLabel">상대</span></span><span>노란 테두리: 선택/공격 가능</span></div></section>
+<aside class="side"><section><h2>전황</h2><div class="turn" id="turnText">내 차례</div><div class="status" id="status" aria-live="polite">빈칸을 클릭해 숫자를 배치하세요.</div><div id="roomInfo" class="hidden"><div class="hint">방 코드</div><div class="roomcode" id="roomCodeText"></div><button class="action" id="copyRoom">방 코드 복사</button><div class="hint" id="opponentText"></div></div><div class="stats"><div class="stat"><span>내 숫자 합</span><strong id="mySum">0</strong></div><div class="stat"><span>상대 숫자 합</span><strong id="enemySum">0</strong></div><div class="stat"><span>내 말 수</span><strong id="myCount">0</strong></div><div class="stat"><span>전체 턴</span><strong id="turnCount">0</strong></div></div><div class="gamebuttons"><button class="action" id="cancelSelect">선택 취소</button><button class="action" id="backHome">메인 화면</button></div></section>
+<section><h2>플레이 방법</h2><ol class="rules"><li>빈칸을 눌러 1 또는 2를 무작위로 배치합니다.</li><li>내 숫자를 선택한 뒤 다시 누르면 +1 됩니다. 각 말은 한 번만 키울 수 있습니다.</li><li>상하좌우에 붙어 있는 적만 공격할 수 있습니다.</li><li>홀수는 홀수끼리, 짝수는 짝수끼리 공격합니다.</li><li>잡으면 적의 칸으로 이동하고 숫자가 홀수↔짝수로 바뀝니다.</li><li>50턴 이후 내 합이 10 이하이면 패배, 상대 합이 10 이하이면 승리합니다. 100턴 또는 판이 가득 차면 합이 높은 쪽이 승리합니다.</li></ol></section>
+<section><h2>전투 기록</h2><div class="log" id="log">게임을 시작했습니다.</div></section></aside></div>
+</section></main>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { getDatabase, ref, set, get, onValue, runTransaction, remove, update } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+/* Firebase Console에서 만든 웹 앱 설정을 아래에 붙여 넣으세요. */
+const firebaseConfig = {
+  apiKey: "PASTE_API_KEY",
+  authDomain: "PASTE_PROJECT_ID.firebaseapp.com",
+  databaseURL: "https://PASTE_PROJECT_ID-default-rtdb.firebaseio.com",
+  projectId: "PASTE_PROJECT_ID",
+  appId: "PASTE_APP_ID"
+};
+const onlineConfigured = firebaseConfig.apiKey !== "PASTE_API_KEY" && firebaseConfig.projectId !== "PASTE_PROJECT_ID";
+let auth=null,db=null,myUid=null,unsubscribeRoom=null,roomId=null,roomData=null,quickListener=null,mode="ai",nickname="",cells=[],turns=0,turn="me",selected=-1,gameOver=false,actionUsed=false,logs=[],busy=false;
+const $=id=>document.getElementById(id), dirs=[[-1,0],[1,0],[0,-1],[0,1]];
+function parity(n){return n%2===0?"even":"odd"}
+function neighbors(i){const r=Math.floor(i/10),c=i%10;return dirs.map(([dr,dc])=>[r+dr,c+dc]).filter(([rr,cc])=>rr>=0&&rr<10&&cc>=0&&cc<10).map(([rr,cc])=>rr*10+cc)}
+function freshGame(firstUid){return {cells:Array(100).fill(null),turns:0,turnUid:firstUid,gameOver:false,winner:null,message:"게임 시작! 빈칸을 눌러 숫자를 배치하세요."}}
+function sum(owner){return cells.reduce((a,x)=>a+(x&&x.owner===owner?x.n:0),0)}
 function count(owner){return cells.filter(x=>x&&x.owner===owner).length}
-function setStatus(s){document.getElementById('status').textContent=s}
+function addLog(s){logs.unshift(s);logs=logs.slice(0,30);$("log").innerHTML=logs.map(x=>"<div>"+escapeHtml(x)+"</div>").join("")}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function setStatus(s){$("status").textContent=s}
+function showHomeStatus(s){$("homeStatus").textContent=s}
+function setScreen(which){$("home").classList.toggle("hidden",which!=="home");$("game").classList.toggle("hidden",which!=="game")}
+function getPlayerName(uid){if(mode==="ai")return uid==="me"?"AI":"나";return roomData&&roomData.players&&roomData.players[uid]?roomData.players[uid].nickname:"상대"}
+function isMine(owner){return mode==="ai"?owner==="me":owner===myUid}
+function myOwner(){return mode==="ai"?"me":myUid}
+function enemyOwner(){if(mode==="ai")return "ai";return roomData&&roomData.players?Object.keys(roomData.players).find(id=>id!==myUid)||"waiting": "waiting"}
 function render(){
- boardEl.innerHTML='';
- const attackTargets=new Set();
- if(selected>=0&&cells[selected]&&cells[selected].owner==='me'){
-   neighbors(selected).forEach(i=>{let x=cells[i];if(x&&x.owner==='ai'&&parity(x.n)===parity(cells[selected].n))attackTargets.add(i)})
- }
- cells.forEach((x,i)=>{
-   const b=document.createElement('button');b.className='cell'+(x?' '+x.owner:'')+(selected===i?' selected':'')+(attackTargets.has(i)?' target':'');
-   b.setAttribute('aria-label',x?(x.owner==='me'?'내 숫자':'AI 숫자')+' '+x.n:'빈칸');
-   b.innerHTML=x?x.n+'<span class="owner">'+(x.owner==='me'?'나':'AI')+'</span>':'';
-   b.addEventListener('click',()=>clickCell(i));boardEl.appendChild(b);
- });
- document.getElementById('mySum').textContent=sums('me');document.getElementById('aiSum').textContent=sums('ai');
- document.getElementById('myCount').textContent=count('me');document.getElementById('turnCount').textContent=turns;
- document.getElementById('turnText').textContent=gameOver?'게임 종료':turn==='me'?'내 차례':'AI 생각 중…';
- document.getElementById('turnPill').textContent=gameOver?'게임 종료':turn==='me'?'내 차례':'AI 차례';
- document.getElementById('endAction').textContent=selected>=0?'선택 취소':'내 숫자 선택';
+ const board=$("board");board.innerHTML="";const targets=new Set();
+ if(selected>=0&&cells[selected]&&isMine(cells[selected].owner))neighbors(selected).forEach(i=>{const x=cells[i];if(x&&x.owner!==myOwner()&&x.owner!=="ai"&&parity(x.n)===parity(cells[selected].n))targets.add(i);else if(mode==="ai"&&x&&x.owner==="ai"&&parity(x.n)===parity(cells[selected].n))targets.add(i)});
+ cells.forEach((x,i)=>{const b=document.createElement("button");const mine=x&&isMine(x.owner);b.className="cell"+(x?(mine?" me":" enemy"):"")+(selected===i?" selected":"")+(targets.has(i)?" target":"");b.setAttribute("aria-label",x?(mine?"내 숫자 ":"상대 숫자 ")+x.n:"빈칸");b.innerHTML=x?String(x.n)+'<span class="owner">'+escapeHtml(mine?"나":(mode==="ai"?"AI":getPlayerName(x.owner).slice(0,5)))+"</span>":"";b.disabled=busy||gameOver||(mode!=="ai"&&roomData&&roomData.game&&roomData.game.turnUid!==myUid);b.addEventListener("click",()=>clickCell(i));board.appendChild(b)});
+ const mine=myOwner(),enemy=mode==="ai"?"ai":enemyOwner();$("mySum").textContent=sum(mine);$("enemySum").textContent=enemy==="waiting"?"—":sum(enemy);$("myCount").textContent=count(mine);$("turnCount").textContent=turns;
+ const myTurn=mode==="ai"?turn==="me":roomData&&roomData.game&&roomData.game.turnUid===myUid;
+ $("turnText").textContent=gameOver?"게임 종료":myTurn?"내 차례":(mode!=="ai"&&enemy==="waiting"?"상대 기다리는 중…":"상대 차례");$("turnPill").textContent=gameOver?"게임 종료":myTurn?"내 차례":"상대 차례";
+ $("enemyLabel").textContent=mode==="ai"?"AI":(enemy==="waiting"?"상대":getPlayerName(enemy));
+ $("cancelSelect").disabled=selected<0;$("roomInfo").classList.toggle("hidden",mode==="ai");
+ if(mode!=="ai"&&roomId){$("roomCodeText").textContent=roomId;$("opponentText").textContent=enemy==="waiting"?"상대가 들어오면 게임이 시작됩니다.":"상대: "+getPlayerName(enemy)}
+}
+function checkGame(g){const mine=g.cells.reduce((a,x)=>a+(x&&x.owner===myOwner()?x.n:0),0);const enemy=g.cells.reduce((a,x)=>a+(x&&x.owner===(mode==="ai"?"ai":enemyOwner())?x.n:0),0);const boardFull=g.cells.every(Boolean);if(g.turns>=50&&mine<=10){g.gameOver=true;g.winner=enemyOwner();g.message="패배! 50턴 이후 내 숫자 합이 10 이하입니다."}else if(g.turns>=50&&enemy<=10){g.gameOver=true;g.winner=myOwner();g.message="승리! 상대의 숫자 합이 10 이하입니다."}else if(g.turns>=100||boardFull){g.gameOver=true;g.winner=mine>enemy?myOwner():enemy>mine?enemyOwner():null;g.message=mine>enemy?"승리! 최종 숫자 합 "+mine+" 대 "+enemy+".":enemy>mine?"패배! 최종 숫자 합 "+mine+" 대 "+enemy+".":"무승부! 양쪽 숫자 합이 같습니다."}}
+function applyAction(g,action,uid,ownerEnemy){
+ if(!g||g.gameOver)return null;const owner=uid,idx=action.index,x=g.cells[idx],selectedCell=action.selectedIndex===undefined?-1:action.selectedIndex;
+ if(action.type==="place"){if(x)return null;g.cells[idx]={owner,n:Math.random()<.5?1:2,boosted:false}}
+ else if(action.type==="boost"){if(!x||x.owner!==owner||x.boosted)return null;x.n++;x.boosted=true}
+ else if(action.type==="attack"){const attacker=g.cells[action.from],target=g.cells[idx];if(!attacker||attacker.owner!==owner||!target||target.owner!==ownerEnemy||!neighbors(action.from).includes(idx)||parity(attacker.n)!==parity(target.n))return null;let n=attacker.n+1;if(parity(n)===parity(target.n))n++;g.cells[idx]={owner,n,boosted:!!attacker.boosted};g.cells[action.from]=null}
+ else return null;
+ g.turns++;checkGame(g);if(!g.gameOver)g.turnUid=ownerEnemy;return g;
+}
+async function onlineAction(action){
+ if(!db||!roomId||busy)return;busy=true;render();
+ try{const r=ref(db,"rooms/"+roomId+"/game");let accepted=false;await runTransaction(r,current=>{if(!current||current.gameOver||current.turnUid!==myUid)return;const draft=JSON.parse(JSON.stringify(current));const enemy=Object.keys(roomData.players||{}).find(id=>id!==myUid);const next=applyAction(draft,action,myUid,enemy);if(!next)return;accepted=true;return next});if(!accepted)setStatus("이미 턴이 바뀌었거나, 할 수 없는 행동이에요.")}
+ catch(e){setStatus("온라인 연결 오류: "+e.message)}finally{busy=false}
 }
 function clickCell(i){
- if(gameOver||turn!=='me')return;
- const x=cells[i];
+ if(gameOver||busy)return;
+ if(mode!=="ai"){if(!roomData||!roomData.players||Object.keys(roomData.players).length<2){setStatus("상대가 참가할 때까지 기다려 주세요.");return}if(!roomData.game||roomData.game.turnUid!==myUid){setStatus("상대 차례예요. 잠시 기다려 주세요.");return}}
+ const owner=myOwner(),x=cells[i],enemy=mode==="ai"?"ai":enemyOwner();
  if(selected>=0&&selected!==i&&cells[selected]){
    const attacker=cells[selected];
-   if(x&&x.owner==='ai'&&neighbors(selected).includes(i)&&parity(attacker.n)===parity(x.n)){
-     const old=x.n;cells[i]={owner:'me',n:attacker.n+1,boosted:attacker.boosted};
-     if(parity(cells[i].n)===parity(old))cells[i].n++;
-     cells[selected]=null;selected=i;addLog('내 '+attacker.n+'이(가) AI '+old+'을(를) 잡았다!');finishTurn();return;
+   if(x&&x.owner===enemy&&neighbors(selected).includes(i)&&parity(attacker.n)===parity(x.n)){
+     if(mode==="ai"){const old=x.n;cells[i]={owner,n:attacker.n+1,boosted:attacker.boosted};if(parity(cells[i].n)===parity(old))cells[i].n++;cells[selected]=null;addLog("내 "+attacker.n+"이(가) 상대 "+old+"을(를) 잡았다!");selected=-1;finishAiTurn();return}
+     onlineAction({type:"attack",from:selected,index:i});selected=-1;return;
    }
  }
- if(!x){cells[i]={owner:'me',n:Math.random()<.5?1:2,boosted:false};selected=i;addLog('빈칸에 내 숫자 '+cells[i].n+' 배치');finishTurn();return}
- if(x.owner==='me'){
-   if(selected===i){
-     if(!x.boosted){x.n++;x.boosted=true;addLog('내 숫자를 '+x.n+'로 올렸다.');selected=-1;finishTurn();return}
-     setStatus('이 숫자는 이미 이번 게임에서 증가시켰어요. 다른 말을 선택하세요.');return;
-   }
-   selected=i;setStatus('선택한 숫자를 다시 누르면 +1, 상하좌우의 같은 홀짝 적은 공격할 수 있어요.');render();return;
- }
- if(selected>=0){setStatus('공격하려면 상하좌우에 있는 같은 홀짝의 적 숫자를 누르세요.');return}
- setStatus('내 숫자를 먼저 선택하세요.');render();
+ if(!x){if(mode==="ai"){cells[i]={owner,n:Math.random()<.5?1:2,boosted:false};selected=i;addLog("내 숫자 "+cells[i].n+" 배치");selected=-1;finishAiTurn()}else{onlineAction({type:"place",index:i});selected=-1}return}
+ if(x.owner===owner){if(selected===i){if(!x.boosted){if(mode==="ai"){x.n++;x.boosted=true;addLog("내 숫자를 "+x.n+"로 올렸다.");selected=-1;finishAiTurn()}else{onlineAction({type:"boost",index:i});selected=-1}return}setStatus("이 숫자는 이미 한 번 키웠어요.");return}selected=i;setStatus("선택한 숫자를 다시 누르면 +1, 상하좌우의 같은 홀짝 적은 공격할 수 있어요.");render();return}
+ setStatus("내 숫자를 먼저 선택하고, 상하좌우의 같은 홀짝 적을 눌러 공격하세요.");render()
 }
-function finishTurn(){
- selected=-1;turns++;checkEnd();
- if(!gameOver){turn='ai';render();setTimeout(aiMove,450)}else render();
+function finishAiTurn(){turns++;checkAiEnd();if(!gameOver){turn="ai";render();setTimeout(aiMove,420)}else render()}
+function checkAiEnd(){const a=sum("me"),b=sum("ai");if(turns>=50&&a<=10){gameOver=true;setStatus("패배! 50턴 이후 내 숫자 합이 10 이하입니다.");addLog("패배: 내 숫자 합이 10 이하")}else if(turns>=50&&b<=10){gameOver=true;setStatus("승리! AI의 숫자 합이 10 이하입니다.");addLog("승리: AI 숫자 합이 10 이하")}else if(turns>=100||cells.every(Boolean)){gameOver=true;setStatus(a>b?"승리! 최종 합 "+a+" 대 "+b+".":b>a?"패배! 최종 합 "+a+" 대 "+b+".":"무승부! 최종 합이 같습니다.");addLog("게임 종료: 내 합 "+a+", AI 합 "+b)}}
+function aiMove(){if(gameOver||mode!=="ai")return;let options=[];for(let i=0;i<100;i++){const a=cells[i];if(!a||a.owner!=="ai")continue;for(const j of neighbors(i)){const t=cells[j];if(t&&t.owner==="me"&&parity(a.n)===parity(t.n))options.push({i,j})}}if(options.length){const o=options[Math.floor(Math.random()*options.length)],a=cells[o.i],t=cells[o.j],old=t.n;let n=a.n+1;if(parity(n)===parity(old))n++;cells[o.j]={owner:"ai",n,boosted:a.boosted};cells[o.i]=null;addLog("AI가 내 "+old+"을(를) 잡았다.")}else{const boostable=cells.map((x,i)=>x&&x.owner==="ai"&&!x.boosted?i:-1).filter(i=>i>=0),empty=cells.map((x,i)=>x===null?i:-1).filter(i=>i>=0);if(boostable.length&&Math.random()<.35){const i=boostable[Math.floor(Math.random()*boostable.length)];cells[i].n++;cells[i].boosted=true;addLog("AI가 숫자를 "+cells[i].n+"로 올렸다.")}else if(empty.length){const i=empty[Math.floor(Math.random()*empty.length)];cells[i]={owner:"ai",n:Math.random()<.5?1:2,boosted:false};addLog("AI가 숫자 "+cells[i].n+" 배치")}else if(boostable.length){const i=boostable[0];cells[i].n++;cells[i].boosted=true}}turns++;checkAiEnd();turn="me";setStatus(gameOver?"게임이 끝났습니다.":"빈칸을 눌러 숫자를 배치하거나 내 숫자를 선택하세요.");render()}
+function resetLocal(){mode="ai";roomId=null;roomData=null;cells=Array(100).fill(null);turns=0;turn="me";selected=-1;gameOver=false;busy=false;logs=[];$("log").innerHTML="";setStatus("빈칸을 클릭해 숫자를 배치하세요.");addLog("AI 대전을 시작했습니다.");$("roomInfo").classList.add("hidden");setScreen("game");render()}
+async function ensureOnline(){if(!onlineConfigured){$("setupNotice").classList.remove("hidden");showHomeStatus("온라인 기능을 사용하려면 먼저 Firebase 설정을 완료해야 해요.");return false}try{if(!auth){const app=initializeApp(firebaseConfig);auth=getAuth(app);db=getDatabase(app)}if(!myUid){const cred=await signInAnonymously(auth);myUid=cred.user.uid}return true}catch(e){showHomeStatus("Firebase 연결에 실패했어요: "+e.message);return false}}
+function randomCode(){return Math.random().toString(36).slice(2,8).toUpperCase()}
+async function createOnlineRoom(quick){
+ nickname=$("nickname").value.trim();if(!nickname){showHomeStatus("먼저 닉네임을 입력해 주세요.");$("nickname").focus();return}
+ if(!(await ensureOnline()))return;showHomeStatus(quick?"상대를 찾고 있어요…":"방을 만들고 있어요…");
+ try{let code=randomCode(),roomRef=ref(db,"rooms/"+code);let exists=await get(roomRef);while(exists.exists()){code=randomCode();roomRef=ref(db,"rooms/"+code);exists=await get(roomRef)}
+ roomId=code;mode="online";const players={};players[myUid]={nickname:nickname,joinedAt:Date.now()};roomData={hostUid:myUid,players,status:"waiting",game:freshGame(myUid),createdAt:Date.now(),quick:!!quick};await set(roomRef,roomData);
+ if(quick){await set(ref(db,"matchmaking/waiting"),{uid:myUid,nickname:nickname,roomCode:code,createdAt:Date.now()});showHomeStatus("상대를 찾는 중이에요. 상대가 접속하면 자동으로 시작합니다.");quickListener=onValue(ref(db,"matchmaking/waiting"),async snap=>{const q=snap.val();if(!q||q.uid===myUid||!roomId)return;const joined=await joinOnlineRoom(q.roomCode,true);if(joined){await remove(ref(db,"matchmaking/waiting"));if(quickListener){quickListener();quickListener=null}}})}
+ subscribeRoom();setScreen("game");selected=-1;logs=[];addLog(quick?"빠른 대전 대기실을 만들었습니다.":"방을 만들었습니다. 코드를 친구에게 알려 주세요.");setStatus(quick?"상대가 들어오면 게임이 시작됩니다.":"방 코드 "+code+"를 친구에게 공유하세요.");render();
+ }catch(e){showHomeStatus("방을 만들지 못했어요: "+e.message)}
 }
-function checkEnd(){
- if(turns>=50&&sums('me')<=10){gameOver=true;setStatus('패배! 50턴 이후 내 숫자 합이 10 이하입니다.');addLog('패배: 50턴 이후 내 숫자 합이 10 이하');return}
- if(turns>=50&&sums('ai')<=10){gameOver=true;setStatus('승리! AI의 숫자 합이 10 이하입니다. (50턴 이후)');addLog('승리: AI 숫자 합이 10 이하');return}
- const boardFull=cells.every(x=>x!==null);
- if(turns>=100||boardFull){
-   const myTotal=sums('me'), aiTotal=sums('ai');
-   gameOver=true;
-   if(myTotal>aiTotal){setStatus('승리! 최종 숫자 합 '+myTotal+' 대 '+aiTotal+'로 이겼습니다.');addLog('게임 종료: 내 합 '+myTotal+', AI 합 '+aiTotal+' — 승리')}
-   else if(aiTotal>myTotal){setStatus('패배! 최종 숫자 합 '+myTotal+' 대 '+aiTotal+'입니다.');addLog('게임 종료: 내 합 '+myTotal+', AI 합 '+aiTotal+' — 패배')}
-   else{setStatus('무승부! 최종 숫자 합이 '+myTotal+'로 같습니다.');addLog('게임 종료: 양쪽 합 '+myTotal+' — 무승부')}
-   return;
- }
+async function joinOnlineRoom(code,fromQuick){
+ if(!myUid)return false;code=String(code||"").trim().toUpperCase();if(!/^[A-Z0-9]{6}$/.test(code)){if(!fromQuick)showHomeStatus("방 코드는 영문/숫자 6자리예요.");return false}
+ const r=ref(db,"rooms/"+code);let joined=false;try{await runTransaction(r,current=>{if(!current)return;if(current.players&&current.players[myUid]){joined=true;return current}const ids=Object.keys(current.players||{});if(ids.length>=2)return;const next=JSON.parse(JSON.stringify(current));next.players=next.players||{};next.players[myUid]={nickname:nickname,joinedAt:Date.now()};next.status="playing";next.game=next.game||freshGame(next.hostUid);joined=true;return next});const snap=await get(r);if(!snap.exists()||!snap.val().players||!snap.val().players[myUid]){if(!fromQuick)showHomeStatus("방을 찾을 수 없거나 이미 꽉 찼어요.");return false}roomId=code;mode="online";roomData=snap.val();subscribeRoom();setScreen("game");selected=-1;logs=[];addLog("방 "+code+"에 참가했습니다.");setStatus("온라인 대전을 시작합니다.");render();return true}catch(e){if(!fromQuick)showHomeStatus("방 참가에 실패했어요: "+e.message);return false}
 }
-function aiMove(){
- if(gameOver)return;
- let options=[];
- for(let i=0;i<100;i++){let a=cells[i];if(!a||a.owner!=='ai')continue;for(const j of neighbors(i)){let t=cells[j];if(t&&t.owner==='me'&&parity(a.n)===parity(t.n))options.push({i,j})}}
- if(options.length){
-   const o=options[Math.floor(Math.random()*options.length)],a=cells[o.i],t=cells[o.j],old=t.n;
-   let n=a.n+1;if(parity(n)===parity(old))n++;
-   cells[o.j]={owner:'ai',n,boosted:a.boosted};cells[o.i]=null;addLog('AI가 내 '+old+'을(를) 잡았다.')
- }else{
-   const boostable=cells.map((x,i)=>x&&x.owner==='ai'&&!x.boosted?i:-1).filter(i=>i>=0);
-   const empty=cells.map((x,i)=>x===null?i:-1).filter(i=>i>=0);
-   if(boostable.length&&Math.random()<.35){let i=boostable[Math.floor(Math.random()*boostable.length)];cells[i].n++;cells[i].boosted=true;addLog('AI가 자기 숫자를 '+cells[i].n+'로 올렸다.')}
-   else if(empty.length){let i=empty[Math.floor(Math.random()*empty.length)];cells[i]={owner:'ai',n:Math.random()<.5?1:2,boosted:false};addLog('AI가 숫자 '+cells[i].n+' 배치')}
-   else if(boostable.length){let i=boostable[Math.floor(Math.random()*boostable.length)];cells[i].n++;cells[i].boosted=true;addLog('AI가 숫자를 올렸다.')}
- }
- turns++;checkEnd();turn='me';setStatus(gameOver?'게임이 끝났습니다.':'빈칸을 눌러 배치하거나 내 숫자를 선택하세요.');render();
-}
-function reset(){
- cells=Array(100).fill(null);turn='me';turns=0;selected=-1;gameOver=false;logItems=[];setStatus('빈칸을 클릭해 숫자를 배치하세요.');addLog('새 게임을 시작했습니다.');render();
-}
-document.getElementById('endAction').addEventListener('click',()=>{selected=-1;setStatus('선택을 취소했습니다.');render()});
-document.getElementById('restart').addEventListener('click',reset);
-reset();
-</script>
-</body>
-</html>
+function subscribeRoom(){if(unsubscribeRoom)unsubscribeRoom();unsubscribeRoom=onValue(ref(db,"rooms/"+roomId),snap=>{if(!snap.exists()){setStatus("방이 종료되었습니다.");return}roomData=snap.val();const g=roomData.game||freshGame(roomData.hostUid);cells=g.cells||Array(100).fill(null);turns=g.turns||0;gameOver=!!g.gameOver;selected=-1;if(gameOver)setStatus(g.message||"게임 종료");else if(Object.keys(roomData.players||{}).length<2)setStatus("상대가 참가할 때까지 기다려 주세요. 방 코드를 공유하세요.");else setStatus(g.turnUid===myUid?"내 차례예요.":"상대가 두고 있어요.");render()})}
+async function leaveOnline(){if(quickListener){quickListener();quickListener=null}if(unsubscribeRoom){unsubscribeRoom();unsubscribeRoom=null}if(db&&roomId&&myUid){try{const qref=ref(db,"matchmaking/waiting");const q=await get(qref);if(q.exists()&&q.val().uid===myUid)await remove(qref)}catch(e){}}roomId=null;roomData=null}
+$("aiStart").addEventListener("click",()=>{nickname=$("nickname").value.trim();if(!nickname){showHomeStatus("닉네임을 입력해 주세요.");$("nickname").focus();return}leaveOnline();resetLocal();$("turnText").textContent=nickname+"의 차례";});
+$("createRoom").addEventListener("click",()=>createOnlineRoom(false));
+$("joinRoom").addEventListener("click",async()=>{nickname=$("nickname").value.trim();if(!nickname){showHomeStatus("먼저 닉네임을 입력해 주세요.");$("nickname").focus();return}if(!(await ensureOnline()))return;await joinOnlineRoom($("roomInput").value,false)});
+$("quickMatch").addEventListener("click",()=>createOnlineRoom(true));
+$("cancelSelect").addEventListener("click",()=>{selected=-1;setStatus("선택을 취소했습니다.");render()});
+$("backHome").addEventListener("click",async()=>{await leaveOnline();setScreen("home");mode="ai";showHomeStatus("");});
+$("copyRoom").addEventListener("click",async()=>{try{await navigator.clipboard.writeText(roomId);setStatus("방 코드 "+roomId+"를 복사했어요.")}catch(e){setStatus("방 코드: "+roomId+" (직접 복사해 주세요.)")}});
+if(!onlineConfigured){$("setupNotice").classList.remove("hidden");$("createRoom").title="Firebase 설정 필요";$("joinRoom").title="Firebase 설정 필요";$("quickMatch").title="Firebase 설정 필요"}
+</script></body></html>
